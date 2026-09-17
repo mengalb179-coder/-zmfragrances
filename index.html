@@ -362,6 +362,272 @@
     document.getElementById('topbar').classList.toggle('scrolled', window.scrollY > 40);
   });
 </script>
+<style>
+.zmc-widget{
+  --zmc-gold:#c9a24b; --zmc-gold-dark:#a9832f; --zmc-panel:#0f0d0c;
+  --zmc-panel2:#181412; --zmc-text:#f2ece2; --zmc-muted:#b9ada0;
+  font-family:'Segoe UI', Tahoma, 'Noto Nastaliq Urdu', sans-serif;
+  direction:rtl;
+}
+#zm-launcher{position:fixed;bottom:24px;left:24px;width:62px;height:62px;border-radius:50%;background:linear-gradient(145deg,var(--zmc-gold),var(--zmc-gold-dark));display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.35);z-index:9999;transition:transform .2s ease;border:none;}
+#zm-launcher:hover{transform:scale(1.07);}
+#zm-launcher svg{width:28px;height:28px;fill:#1a1512;}
+#zm-launcher .dot{position:absolute;top:2px;right:2px;width:12px;height:12px;border-radius:50%;background:#3ddc84;border:2px solid var(--zmc-panel2);}
+#zm-chat{position:fixed;bottom:98px;left:24px;width:360px;max-width:92vw;height:520px;max-height:80vh;background:var(--zmc-panel);border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.45);display:none;flex-direction:column;overflow:hidden;z-index:9999;border:1px solid rgba(201,162,75,.25);}
+#zm-chat.open{display:flex;}
+#zm-header{background:linear-gradient(135deg,#1a1512,#241d18);padding:16px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(201,162,75,.25);}
+#zm-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(145deg,var(--zmc-gold),var(--zmc-gold-dark));display:flex;align-items:center;justify-content:center;font-weight:700;color:#1a1512;font-size:15px;flex-shrink:0;}
+#zm-header-text{flex:1;}
+#zm-header-text .name{color:var(--zmc-gold);font-weight:700;font-size:15px;letter-spacing:.5px;}
+#zm-header-text .status{color:#9adba0;font-size:12px;margin-top:2px;}
+#zm-close{background:none;border:none;color:var(--zmc-muted);cursor:pointer;font-size:20px;line-height:1;padding:4px;}
+#zm-close:hover{color:var(--zmc-text);}
+#zm-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--zmc-panel2);}
+#zm-messages::-webkit-scrollbar{width:6px;}
+#zm-messages::-webkit-scrollbar-thumb{background:rgba(201,162,75,.4);border-radius:3px;}
+.zm-msg{max-width:82%;padding:10px 14px;border-radius:14px;font-size:14px;line-height:1.7;white-space:pre-wrap;box-sizing:border-box;}
+.zm-msg.bot{align-self:flex-start;background:#221c19;color:var(--zmc-text);border-bottom-left-radius:4px;}
+.zm-msg.user{align-self:flex-end;background:var(--zmc-gold);color:#1a1512;border-bottom-right-radius:4px;font-weight:600;}
+.zm-quick-replies{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px;align-self:flex-start;max-width:100%;}
+.zm-qr-btn{background:transparent;border:1px solid var(--zmc-gold);color:var(--zmc-gold);padding:7px 12px;border-radius:20px;font-size:12.5px;cursor:pointer;white-space:nowrap;}
+.zm-qr-btn:hover{background:var(--zmc-gold);color:#1a1512;}
+.zm-product-card{background:var(--zmc-panel);border:1px solid rgba(201,162,75,.3);border-radius:12px;padding:10px 12px;margin-top:6px;width:100%;box-sizing:border-box;}
+.zm-product-card .pname{color:var(--zmc-gold);font-weight:700;font-size:14px;}
+.zm-product-card .pdesc{color:var(--zmc-muted);font-size:12.5px;margin:4px 0 6px;}
+.zm-product-card .prow{display:flex;justify-content:space-between;align-items:center;}
+.zm-product-card .price{color:var(--zmc-text);font-weight:700;font-size:13.5px;}
+.zm-product-card a.zm-order-link{background:var(--zmc-gold);color:#1a1512;text-decoration:none;font-size:12px;font-weight:700;padding:6px 10px;border-radius:16px;}
+#zm-typing{align-self:flex-start;display:flex;gap:4px;padding:10px 14px;background:#221c19;border-radius:14px;border-bottom-left-radius:4px;}
+#zm-typing span{width:6px;height:6px;border-radius:50%;background:var(--zmc-muted);animation:zmblink 1.2s infinite ease-in-out;}
+#zm-typing span:nth-child(2){animation-delay:.2s;}
+#zm-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes zmblink{0%,80%,100%{opacity:.3;}40%{opacity:1;}}
+#zm-inputbar{display:flex;align-items:center;gap:8px;padding:12px;background:var(--zmc-panel);border-top:1px solid rgba(201,162,75,.2);}
+#zm-input{flex:1;background:var(--zmc-panel2);border:1px solid rgba(201,162,75,.25);color:var(--zmc-text);padding:11px 14px;border-radius:22px;font-size:14px;outline:none;font-family:inherit;box-sizing:border-box;}
+#zm-input::placeholder{color:var(--zmc-muted);}
+#zm-send{width:40px;height:40px;border-radius:50%;background:var(--zmc-gold);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+#zm-send svg{width:18px;height:18px;fill:#1a1512;transform:scaleX(-1);}
+#zm-send:hover{background:var(--zmc-gold-dark);}
+</style>
+<button id="zm-launcher" aria-label="Open chat">
+  <svg viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 6.94 2 11.78c0 2.73 1.44 5.17 3.7 6.78-.12.98-.5 2.6-1.6 4.44 0 0 2.42-.36 4.86-2.06 1.02.28 2.1.44 3.04.44 5.52 0 10-3.94 10-8.78S17.52 3 12 3z"/></svg>
+  <span class="dot"></span>
+</button>
 
+<div id="zm-chat" class="zmc-widget">
+  <div id="zm-header">
+    <div id="zm-avatar">ZM</div>
+    <div id="zm-header-text">
+      <div class="name">ZM Paris Assistant</div>
+      <div class="status">● Online</div>
+    </div>
+    <button id="zm-close" aria-label="Close">&#10005;</button>
+  </div>
+  <div id="zm-messages"></div>
+  <div id="zm-inputbar">
+    <input id="zm-input" type="text" placeholder="اپنا سوال لکھیں..." />
+    <button id="zm-send" aria-label="Send">
+      <svg viewBox="0 0 24 24"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>
+    </button>
+  </div>
+</div><script>
+(function(){
+  const WA_BASE = "https://wa.me/923357290695";
+  function waLink(text){ return WA_BASE + "?text=" + encodeURIComponent(text); }
+
+  const PRODUCTS = [
+    { key:"khamrah", name:"Khamrah", desc:"گرم مصالحہ جات اور عنبر کی آمیزش — سردیوں کی شاموں کے لیے موزوں، دیرپا خوشبو۔", price:"Rs 7,500 (≈ US$27)", order:waLink("Assalamualaikum, mujhe ZM Khamrah perfume order karna hai") },
+    { key:"baccarat", name:"Baccarat 540", desc:"زعفران، جیسمین اور صندل کی پرتعیش تہیں — خاص مواقع کے لیے بنی ایک نایاب خوشبو۔", price:"Rs 8,200 (≈ US$29)", order:waLink("Assalamualaikum, mujhe ZM Baccarat 540 perfume order karna hai") },
+    { key:"white musk", name:"White Musk", desc:"نرم، صاف اور پرسکون خوشبو — روزمرہ استعمال اور ہر موسم کے لیے موزوں انتخاب۔", price:"Rs 6,800 (≈ US$24)", order:waLink("Assalamualaikum, mujhe ZM White Musk perfume order karna hai") },
+    { key:"blue men", name:"Blue Men", desc:"تازہ اور مردانہ کریکٹر — سمندری نوٹس کے ساتھ ایک تیز، پراعتماد خوشبو۔", price:"Rs 6,500 (≈ US$23)", order:waLink("Assalamualaikum, mujhe ZM Blue Men perfume order karna hai") },
+    { key:"oud al lail", name:"Oud Al Lail", desc:"گہرے عود اور رات کی خوشبو کا امتزاج — بھاری، پراسرار اور یادگار۔", price:"Rs 8,500 (≈ US$30)", order:waLink("Assalamualaikum, mujhe ZM Oud Al Lail perfume order karna hai") },
+    { key:"janan", name:"Janan", desc:"پھولوں اور مشک کی نرم آمیزش — ایک دلکش اور یادگار تاثر چھوڑنے والی خوشبو۔", price:"Rs 7,200 (≈ US$26)", order:waLink("Assalamualaikum, mujhe ZM Janan perfume order karna hai") },
+  ];
+
+  const messagesEl = document.getElementById('zm-messages');
+  const inputEl = document.getElementById('zm-input');
+  const chatEl = document.getElementById('zm-chat');
+  const launcherEl = document.getElementById('zm-launcher');
+
+  function scrollDown(){ messagesEl.scrollTop = messagesEl.scrollHeight; }
+
+  function addBotText(text){
+    const div = document.createElement('div');
+    div.className = 'zm-msg bot';
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    scrollDown();
+  }
+
+  function addUserText(text){
+    const div = document.createElement('div');
+    div.className = 'zm-msg user';
+    div.textContent = text;
+    messagesEl.appendChild(div);
+    scrollDown();
+  }
+
+  function addProductCard(p){
+    const wrap = document.createElement('div');
+    wrap.className = 'zm-product-card';
+    wrap.innerHTML = `
+      <div class="pname">${p.name}</div>
+      <div class="pdesc">${p.desc}</div>
+      <div class="prow">
+        <span class="price">${p.price}</span>
+        <a class="zm-order-link" target="_blank" rel="noopener" href="${p.order}">واٹس ایپ آرڈر</a>
+      </div>`;
+    messagesEl.appendChild(wrap);
+    scrollDown();
+  }
+
+  function addQuickReplies(options){
+    const wrap = document.createElement('div');
+    wrap.className = 'zm-quick-replies';
+    options.forEach(opt=>{
+      const btn = document.createElement('button');
+      btn.className = 'zm-qr-btn';
+      btn.textContent = opt;
+      btn.onclick = ()=>{ handleUserMessage(opt); };
+      wrap.appendChild(btn);
+    });
+    messagesEl.appendChild(wrap);
+    scrollDown();
+  }
+
+  function showTyping(cb, delay){
+    const t = document.createElement('div');
+    t.id = 'zm-typing';
+    t.innerHTML = '<span></span><span></span><span></span>';
+    messagesEl.appendChild(t);
+    scrollDown();
+    setTimeout(()=>{ t.remove(); cb(); }, delay || 550);
+  }
+
+  function mainMenu(){
+    addQuickReplies(["🛍️ کلیکشن دیکھیں", "💰 قیمتیں", "🚚 ڈیلیوری کی معلومات", "📦 آرڈر کیسے کریں", "☎️ واٹس ایپ پر بات کریں"]);
+  }
+
+  function showAllProducts(){
+    addBotText("ہماری سگنیچر خوشبوؤں میں سے منتخب کریں:");
+    PRODUCTS.forEach(p=>addProductCard(p));
+    setTimeout(()=>addQuickReplies(["⬅️ مزید مدد چاہیے", "📦 آرڈر کیسے کریں"]), 200);
+  }
+
+  function showAllPrices(){
+    let text = "قیمتوں کی مکمل فہرست:\n\n";
+    PRODUCTS.forEach(p=>{ text += `• ${p.name} — ${p.price}\n`; });
+    text += "\nتمام آرڈرز کیش آن ڈیلیوری کے ساتھ دستیاب ہیں۔";
+    addBotText(text);
+    setTimeout(()=>addQuickReplies(["🛍️ کلیکشن دیکھیں", "⬅️ مزید مدد چاہیے"]), 200);
+  }
+
+  function findProduct(msg){
+    return PRODUCTS.find(p => msg.includes(p.key) || msg.includes(p.name.toLowerCase()));
+  }
+
+  function handleUserMessage(raw){
+    const msg = raw.trim();
+    if(!msg) return;
+    addUserText(msg);
+    inputEl.value = '';
+    const lower = msg.toLowerCase();
+
+    showTyping(()=>{
+      if(/^(hi|hello|hey|assalam|salam|السلام|ہیلو|ہائے)/i.test(lower)){
+        addBotText("وعلیکم السلام! 🌸 ZM Zakir Mengal Paris میں خوش آمدید۔ میں آپ کی کیسے مدد کر سکتا ہوں؟");
+        mainMenu();
+        return;
+      }
+      if(lower.includes("کلیکشن") || lower.includes("collection") || lower.includes("پرفیوم") || (lower.includes("خوشبو") && !lower.includes("کونسی"))){
+        showAllProducts();
+        return;
+      }
+      if(lower.includes("قیمت") || lower.includes("price") || lower.includes("rs") || lower.includes("کتنے")){
+        const p = findProduct(lower);
+        if(p){
+          addBotText(`${p.name} کی قیمت ${p.price} ہے۔`);
+          addProductCard(p);
+          setTimeout(mainMenu, 200);
+          return;
+        }
+        showAllPrices();
+        return;
+      }
+      if(lower.includes("ڈیلیوری") || lower.includes("delivery") || lower.includes("shipping") || lower.includes("cod") || lower.includes("cash on")){
+        addBotText("🚚 ڈیلیوری کی تفصیلات:\n\n✓ پاکستان بھر میں ڈیلیوری دستیاب ہے\n✓ کیش آن ڈیلیوری (COD) کی سہولت\n✓ 100% اصلی، ویلوٹ لائنڈ باکس پیکنگ\n\nآرڈر کے بعد عام طور پر 2-4 دن میں ڈیلیوری ہو جاتی ہے۔");
+        mainMenu();
+        return;
+      }
+      if(lower.includes("آرڈر") || lower.includes("order") || lower.includes("خریدنا") || lower.includes("buy")){
+        const p = findProduct(lower);
+        if(p){
+          addBotText(`بہترین انتخاب! ${p.name} آرڈر کرنے کے لیے نیچے بٹن پر کلک کریں:`);
+          addProductCard(p);
+          return;
+        }
+        addBotText("آرڈر کرنا بہت آسان ہے:\n\n1️⃣ اپنی پسندیدہ خوشبو منتخب کریں\n2️⃣ واٹس ایپ بٹن پر کلک کریں\n3️⃣ اپنا نام، پتہ اور نمبر بھیجیں\n4️⃣ ڈیلیوری پر کیش ادا کریں 💵");
+        setTimeout(()=>addQuickReplies(["🛍️ کلیکشن دیکھیں", "☎️ واٹس ایپ پر بات کریں"]), 200);
+        return;
+      }
+      if(lower.includes("واٹس ایپ") || lower.includes("whatsapp") || lower.includes("رابطہ") || lower.includes("contact") || lower.includes("نمبر")){
+        addBotText("ہمارا واٹس ایپ نمبر: 0335 7290695\n\nنیچے بٹن سے براہ راست بات کریں:");
+        const div = document.createElement('div');
+        div.className = 'zm-product-card';
+        div.innerHTML = `<a class="zm-order-link" style="display:block;text-align:center" target="_blank" rel="noopener" href="${WA_BASE}?text=${encodeURIComponent('Assalamualaikum, mujhe ZM perfumes ke baare mein maloomat chahiye')}">واٹس ایپ کھولیں</a>`;
+        messagesEl.appendChild(div);
+        scrollDown();
+        return;
+      }
+      if(lower.includes("اصلی") || lower.includes("original") || lower.includes("genuine")){
+        addBotText("جی ہاں، ZM Paris کی تمام مصنوعات 100% اصلی ہیں، ویلوٹ لائنڈ باکسز میں پیک کی جاتی ہیں — تحفے کے لیے بھی بہترین۔");
+        mainMenu();
+        return;
+      }
+      if(lower.includes("سائز") || lower.includes("size") || lower.includes("ml") || lower.includes("70")){
+        addBotText("ہر بوتل 70ML کی ہے — Eau De Parfum، لمبے عرصے تک قائم رہنے والی خوشبو کے ساتھ۔");
+        mainMenu();
+        return;
+      }
+      if(lower.includes("مزید مدد") || lower.includes("مینو") || lower.includes("menu") || lower.includes("⬅️")){
+        addBotText("بتائیں، اور کس چیز میں مدد چاہیے؟");
+        mainMenu();
+        return;
+      }
+      if(lower.includes("شکریہ") || lower.includes("thanks") || lower.includes("thank you")){
+        addBotText("خوش آمدید! 🌸 خریداری میں کوئی بھی سوال ہو تو بتائیے۔");
+        return;
+      }
+      const p = findProduct(lower);
+      if(p){
+        addBotText(`${p.name} کے بارے میں معلومات:`);
+        addProductCard(p);
+        setTimeout(mainMenu, 200);
+        return;
+      }
+      addBotText("معذرت، میں یہ بات پوری طرح سمجھ نہیں سکا۔ آپ نیچے دیے گئے آپشنز میں سے منتخب کر سکتے ہیں، یا براہ راست واٹس ایپ پر رابطہ کریں۔");
+      mainMenu();
+    });
+  }
+
+  document.getElementById('zm-send').onclick = ()=>handleUserMessage(inputEl.value);
+  inputEl.addEventListener('keydown', e=>{ if(e.key==='Enter') handleUserMessage(inputEl.value); });
+
+  launcherEl.onclick = ()=>{
+    chatEl.classList.add('open');
+    launcherEl.style.display = 'none';
+    if(messagesEl.children.length === 0){
+      showTyping(()=>{
+        addBotText("وعلیکم السلام! 🌸 ZM Zakir Mengal Paris میں خوش آمدید۔\nمیں آپ کی خوشبو کے انتخاب، قیمتوں یا آرڈر میں مدد کر سکتا ہوں۔");
+        mainMenu();
+      }, 400);
+    }
+  };
+  document.getElementById('zm-close').onclick = ()=>{
+    chatEl.classList.remove('open');
+    launcherEl.style.display = 'flex';
+  };
+})();
+</script>
 </body>
 </html>
